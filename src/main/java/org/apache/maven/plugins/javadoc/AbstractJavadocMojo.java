@@ -449,6 +449,16 @@ public abstract class AbstractJavadocMojo
     private String javadocExecutable;
 
     /**
+     * Sets the absolute path of the jdk home. It's used to extract jpms information.
+     * If null it will be calculated from the javadocExecutable
+     *
+     * @since 3.1.1
+     *
+     */
+    @Parameter( property = "jdkHome" )
+    private String jdkHome;
+
+    /**
      * Version of the Javadoc Tool executable to use, ex. "1.3", "1.5".
      *
      * @since 2.3
@@ -3714,6 +3724,27 @@ public abstract class AbstractJavadocMojo
         // We bravely ignore FTP because no one (probably) uses FTP for Javadoc
     }
 
+    private String getJavadocCommand()
+    {
+        return "javadoc" + ( SystemUtils.IS_OS_WINDOWS ? ".exe" : "" );
+    }
+
+    /**
+     * we assume it's the main directory of the javadoc executable (with jdkHome/bin/javadoc)
+     * @return The java_home used to build the Javadoc
+     */
+    private File getJdkHome()
+        throws IOException
+    {
+        if ( org.apache.commons.lang.StringUtils.isNotEmpty( jdkHome ) )
+        {
+            return new File( jdkHome );
+        }
+        String jdkHome = org.apache.commons.lang.StringUtils.removeEnd( getJavadocExecutable(), getJavadocCommand() );
+        File home = new File( jdkHome, File.separator + " .." );
+        return home.exists() ? home : SystemUtils.getJavaHome();
+    }
+
     /**
      * Get the path of the Javadoc tool executable depending the user entry or try to find it depending the OS
      * or the <code>java.home</code> system property or the <code>JAVA_HOME</code> environment variable.
@@ -3739,7 +3770,7 @@ public abstract class AbstractJavadocMojo
             }
         }
 
-        String javadocCommand = "javadoc" + ( SystemUtils.IS_OS_WINDOWS ? ".exe" : "" );
+        String javadocCommand = getJavadocCommand();
 
         File javadocExe;
 
@@ -4987,7 +5018,12 @@ public abstract class AbstractJavadocMojo
             for ( Map.Entry<String, Collection<Path>> projectSourcepaths : allSourcePaths.entrySet() )
             {
                 MavenProject aggregatedProject = reactorKeys.get( projectSourcepaths.getKey() );
-                if ( aggregatedProject != null && !"pom".equals( aggregatedProject.getPackaging() ) )
+                // FIXME not the best here with this list of packaging as there is more...
+                ArtifactHandler artifactHandler = aggregatedProject.getArtifact().getArtifactHandler();
+                if ( aggregatedProject != null
+//                    && !"pom".equals( aggregatedProject.getPackaging() )
+//                    && !"war".equals( aggregatedProject.getPackaging() )
+                    && "java".equals( artifactHandler.getLanguage() ) )
                 {
                     ResolvePathResult result = null;
 
@@ -4995,9 +5031,10 @@ public abstract class AbstractJavadocMojo
                     File artifactFile = getArtifactFile( aggregatedProject );
                     if ( artifactFile != null )
                     {
-                        ResolvePathRequest<File> request = ResolvePathRequest.ofFile( artifactFile );
                         try
                         {
+                            ResolvePathRequest<File> request = ResolvePathRequest.ofFile( artifactFile )
+                                .setJdkHome( getJdkHome() );
                             result = locationManager.resolvePath( request );
                         }
                         catch ( RuntimeException e )
