@@ -6349,7 +6349,7 @@ public abstract class AbstractJavadocMojo
                 // Even when link produces error it should be kept in the set because the error might be caused by
                 // incomplete redirect configuration on the server side.
                 // This partially restores the previous behaviour before fix for MJAVADOC-427
-                redirectLinks.add(link);
+                redirectLinks.add( link );
             }
         }
         return redirectLinks;
