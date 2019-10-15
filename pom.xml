@@ -29,8 +29,9 @@ under the License.
     <relativePath />
   </parent>
 
+  <groupId>com.github.schelldorfer</groupId>
   <artifactId>maven-javadoc-plugin</artifactId>
-  <version>3.1.2-SNAPSHOT</version>
+  <version>3.1.2</version>
   <packaging>maven-plugin</packaging>
 
   <name>Apache Maven Javadoc Plugin</name>
