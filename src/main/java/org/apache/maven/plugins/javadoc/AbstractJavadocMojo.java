@@ -1427,8 +1427,8 @@ public abstract class AbstractJavadocMojo
     /**
      * Specifies the path of an additional HTML stylesheet file.
      */
-    @Parameter( property = "add-stylesheet" )
-    private String addstylesheet;
+    @Parameter
+    private String addStylesheet;
     
     /**
      * Specifies the class file that starts the taglet used in generating the documentation for that tag.
@@ -2991,7 +2991,12 @@ public abstract class AbstractJavadocMojo
     private String getAddStylesheet( final File javadocOutputDirectory )
             throws MavenReportException
     {
-        File addstylesheetfile = new File( addstylesheet );
+        if ( StringUtils.isEmpty( addStylesheet ) )
+        {
+            return null;
+        }
+        
+        File addstylesheetfile = new File( addStylesheet );
         if ( addstylesheetfile.exists() )
         {
             String stylesheet = getStylesheetFile( javadocOutputDirectory );
