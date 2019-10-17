@@ -60,11 +60,12 @@ under the License.
     <url>https://builds.apache.org/job/maven-box/job/maven-javadoc-plugin/</url>
   </ciManagement>
   <distributionManagement>
-    <site>
-      <id>apache.website</id>
-      <url>scm:svn:https://svn.apache.org/repos/asf/maven/website/components/${maven.site.path}</url>
-    </site>
-  </distributionManagement>
+		<repository>
+			<id>artifactory-release</id>
+			<name>ext-release-local</name>
+			<url>http://192.168.36.5:8081/artifactory/ext-release-local</url>
+		</repository>
+	</distributionManagement>
 
   <properties>
     <javaVersion>7</javaVersion>
@@ -349,6 +350,7 @@ under the License.
               <exclude>src/test/resources/unit/test-javadoc-test/junit/junit/3.8.1/junit-3.8.1.pom</exclude>
               <!-- temporary file that sometimes stays after a failure then completely blocks build -->
               <exclude>javadoc-options-javadoc-resources.xml</exclude>
+              <exclude>**/*.launch</exclude>
             </excludes>
           </configuration>
         </plugin>
